@@ -1,5 +1,5 @@
 import {
-  type CommandsRegistry,
+  CommandsRegistry,
   registerCommand,
   runCommand,
 } from "./commands/commands";
