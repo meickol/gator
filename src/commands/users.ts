@@ -1,6 +1,6 @@
 import { setUser } from "../config";
 
-export function handlerLogin(cmdName: string, ...args: string[]) {
+export async function handlerLogin(cmdName: string, ...args: string[]): Promise<void> {
   if (args.length !== 1) {
     throw new Error(`usage: ${cmdName} <name>`);
   }
