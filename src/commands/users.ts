@@ -1,5 +1,5 @@
-import { setUser } from "../config";
-import { createUser, getUser, resetUser } from "../lib/db/queries/users";
+import { readConfig, setUser } from "../config";
+import { createUser, getUser, resetUser, listUsers } from "../lib/db/queries/users";
 
 export async function handlerLogin(cmdName: string, ...args: string[]): Promise<void> {
   if (args.length !== 1) {
@@ -44,9 +44,16 @@ export async function handlerRegisterUser(cmdName: string, ...args: string[]): P
 
 // Delete all users from table users
 export async function handlerResetUser(cmdName: string): Promise<void> {
- 
-
   await resetUser();
   console.log("User reset successfully!");
+  process.exit(0);
+}
+
+export async function handlerListUsers(cmdName: string): Promise<void> {
+  const users = (await listUsers()).sort((a, b) => a.name.localeCompare(b.name));
+  const currentUser = readConfig().currentUserName;
+  users.forEach(user => {
+    console.log(`* ${user.name} ${user.name === currentUser ? "(current)" : ""}`);
+  });
   process.exit(0);
 }
