@@ -1,7 +1,7 @@
 import { XMLParser } from "fast-xml-parser";
 import { readConfig } from "../config";
 import { Feed, User, users } from "../lib/db/schema";
-import { createFeed, getFeeds, getFeedByUrl, createFeedFollow, getFeedFollowsForUser } from "../lib/db/queries/feeds";
+import { createFeed, getFeeds, getFeedByUrl, createFeedFollow, getFeedFollowsForUser, deleteFeedFollowByUserAndUrl } from "../lib/db/queries/feeds";
 import { getUser, getUserById } from "../lib/db/queries/users";
 
 export type RSSItem = {
@@ -84,19 +84,18 @@ export async function handlerAgg(cmdName: string, ...args: string[]): Promise<vo
   }
 }
 
-export async function handlerAddFeed(cmdName: string, ...args: string[]): Promise<void> {
-  const currentUser = await getUser(readConfig().currentUserName);
+export async function handlerAddFeed(cmdName: string, user: User, ...args: string[]): Promise<void> {
   const name = args[0];
   const url = args[1];
 
-  console.log(`Adding feed ${name} URL: ${url} for user ${currentUser.name}`);
+  console.log(`Adding feed ${name} URL: ${url} for user ${user.name}`);
 
-  const feed = await createFeed(name, url, currentUser.id);
+  const feed = await createFeed(name, url, user.id);
   console.log(`Feed added successfully!`);
-  printFeed(feed, currentUser);
+  printFeed(feed, user);
   
   // Automatically create a feed follow record for the current user
-  const followResult = await createFeedFollow(feed.id, currentUser.id);
+  const followResult = await createFeedFollow(feed.id, user.id);
   console.log(`Automatically following ${followResult.feedName} by ${followResult.userName}`);
   
   process.exit(0);
@@ -115,8 +114,7 @@ export async function handlerListFeeds(cmdName: string, ...args: string[]): Prom
   process.exit(0);
 }
 
-export async function handlerFollow(cmdName: string, ...args: string[]): Promise<void> {
-  const currentUser = await getUser(readConfig().currentUserName);
+export async function handlerFollow(cmdName: string, user: User, ...args: string[]): Promise<void> {
   const url = args[0];
 
   if (!url) {
@@ -130,14 +128,13 @@ export async function handlerFollow(cmdName: string, ...args: string[]): Promise
     process.exit(1);
   }
 
-  const result = await createFeedFollow(feed.id, currentUser.id);
+  const result = await createFeedFollow(feed.id, user.id);
   console.log(`Successfully followed ${result.feedName} by ${result.userName}`);
   process.exit(0);
 }
 
-export async function handlerFollowing(cmdName: string, ...args: string[]): Promise<void> {
-  const currentUser = await getUser(readConfig().currentUserName);
-  const feedFollows = await getFeedFollowsForUser(currentUser.id);
+export async function handlerFollowing(cmdName: string, user: User, ...args: string[]): Promise<void> {
+  const feedFollows = await getFeedFollowsForUser(user.id);
 
   if (feedFollows.length === 0) {
     console.log("You are not following any feeds.");
@@ -147,5 +144,23 @@ export async function handlerFollowing(cmdName: string, ...args: string[]): Prom
       console.log(`- ${follow.feedName}`);
     });
   }
+  process.exit(0);
+}
+
+export async function handlerUnfollow(cmdName: string, user: User, ...args: string[]): Promise<void> {
+  const url = args[0];
+
+  if (!url) {
+    console.log("Usage: unfollow <url>");
+    process.exit(1);
+  }
+
+  const success = await deleteFeedFollowByUserAndUrl(user.id, url);
+  if (!success) {
+    console.log(`Feed with URL ${url} not found or you are not following it.`);
+    process.exit(1);
+  }
+
+  console.log(`Successfully unfollowed feed with URL: ${url}`);
   process.exit(0);
 }
