@@ -239,14 +239,6 @@ Make sure your `~/.gatorconfig.json` file exists and has the correct format:
 cat ~/.gatorconfig.json
 ```
 
-### Permission Issues
-
-Ensure your PostgreSQL user has the necessary permissions:
-```sql
-GRANT ALL PRIVILEGES ON DATABASE gator_db TO your_username;
-```
-
-
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
