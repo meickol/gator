@@ -7,7 +7,7 @@ export async function createPost(title: string, url: string, description: string
     return result;
 }
 
-export async function getPostsForUser(userId: string, limit: number = 2): Promise<{
+export async function getPostsForUser(userId: string, limit: number): Promise<{
     post: Post;
     feedName: string;
   }[]> {

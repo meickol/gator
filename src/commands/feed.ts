@@ -1,6 +1,6 @@
 import { XMLParser } from "fast-xml-parser";
 import { Feed, User, users } from "../lib/db/schema";
-import { createFeed, getFeeds, getFeedByUrl, createFeedFollow, getFeedFollowsForUser, deleteFeedFollowByUserAndUrl, markFeedFetched, getNextFeedToFetch, getPostsForUser } from "../lib/db/queries/feeds";
+import { createFeed, getFeeds, getFeedByUrl, createFeedFollow, getFeedFollowsForUser, deleteFeedFollowByUserAndUrl, markFeedFetched, getNextFeedToFetch } from "../lib/db/queries/feeds";
 import { createPost } from "../lib/db/queries/post";
 
 export type RSSItem = {
@@ -208,6 +208,7 @@ export async function handlerAgg(cmdName: string, ...args: string[]): Promise<vo
       console.log("\nShutting down feed aggregator...");
       clearInterval(interval);
       resolve();
+      process.exit(0);
     });
   });
 }
@@ -327,43 +328,3 @@ export async function handlerUnfollow(cmdName: string, user: User, ...args: stri
   process.exit(0);
 }
 
-/**
- * Handles browsing the latest posts for the current user
- * @param cmdName - The name of the command (unused)
- * @param user - The user whose posts to browse
- * @param args - Command arguments: [limit] (optional, defaults to 2)
- */
-export async function handlerBrowse(cmdName: string, user: User, ...args: string[]): Promise<void> {
-  const limitStr = args[0];
-  let limit = 2; // Default limit
-
-  // Parse limit if provided
-  if (limitStr) {
-    const parsedLimit = parseInt(limitStr);
-    if (isNaN(parsedLimit) || parsedLimit <= 0) {
-      console.log("Error: limit must be a positive number");
-      process.exit(1);
-    }
-    limit = parsedLimit;
-  }
-
-  console.log(`Browsing latest ${limit} posts for user ${user.name}:`);
-
-  const posts = await getPostsForUser(user.id, limit);
-
-  if (posts.length === 0) {
-    console.log("No posts found. Follow some feeds first!");
-  } else {
-    posts.forEach((postData, index) => {
-      const { post, feedName } = postData;
-      console.log(`${index + 1}. ${post.title}`);
-      console.log(`   URL: ${post.url}`);
-      console.log(`   Description: ${post.description || 'No description'}`);
-      console.log(`   Published: ${post.publishedAt ? post.publishedAt.toLocaleString() : 'Unknown'}`);
-      console.log(`   From: ${feedName}`);
-      console.log();
-    });
-  }
-
-  process.exit(0);
-}
