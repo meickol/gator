@@ -6,7 +6,7 @@ import {
 } from "./commands/commands";
 import { handlerLogin, handlerRegisterUser, handlerResetUser, handlerListUsers } from "./commands/users";
 import { handlerAgg, handlerAddFeed, handlerListFeeds, handlerFollow, handlerFollowing, handlerUnfollow } from "./commands/feed";
-import { handlerBrowse } from "./commands/post";
+import { handlerBrowse } from "./commands/browse";
 
 async function main() {
   const args = process.argv.slice(2);
