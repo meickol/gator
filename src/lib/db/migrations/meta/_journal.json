@@ -22,6 +22,20 @@
       "when": 1749091230319,
       "tag": "0002_chemical_slyde",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1749092323730,
+      "tag": "0003_black_inertia",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1749494989157,
+      "tag": "0004_calm_squirrel_girl",
+      "breakpoints": true
     }
   ]
 }
